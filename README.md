@@ -140,6 +140,34 @@ large repositories or leaving it running unattended — `MAX_FILES_PER_REPO` and
 - **Commit analysis is capped** (100 commits unauthenticated, up to 300 with a
   `GITHUB_TOKEN`) to stay within GitHub's rate limits.
 
+## Running commands
+
+### macOS / Linux
+
+```bash
+# Backend
+cd backend && python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env   # add your GROQ_API_KEY + PINECONE_API_KEY
+uvicorn app.main:app --reload --port 8000
+
+# Frontend (separate terminal)
+cd frontend && npm install && npm run dev
+```
+
+### Windows (PowerShell)
+
+```powershell
+# Backend
+cd backend; python -m venv .venv; .\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+Copy-Item .env.example .env   # add your GROQ_API_KEY + PINECONE_API_KEY
+uvicorn app.main:app --reload --port 8000
+
+# Frontend (separate terminal)
+cd frontend; npm install; npm run dev
+```
+
 ## Project structure
 
 ```
