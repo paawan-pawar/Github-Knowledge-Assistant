@@ -1,4 +1,8 @@
-const BASE = "/api";
+﻿// In local dev, this stays "/api" and Vite's dev-server proxy (vite.config.js)
+// forwards it to the backend. In production there's no such proxy, so set
+// VITE_API_BASE_URL at build time to your deployed backend's full URL, e.g.
+// VITE_API_BASE_URL=https://repo-radar-api.onrender.com/api
+const BASE = import.meta.env.VITE_API_BASE_URL || "/api";
 
 class ApiError extends Error {
   constructor(message, status) {
