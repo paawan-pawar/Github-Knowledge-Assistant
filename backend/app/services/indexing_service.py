@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import datetime as dt
 import shutil
@@ -56,8 +56,15 @@ async def run_indexing(repo_id: str) -> None:
         source_root = record.source_root()
         shutil.rmtree(local_dir, ignore_errors=True)
 
+        # Extract into a temp dir *distinct* from source_root: the tarball's
+        # top-level folder ends up nested one level inside whatever dest_dir
+        # we pass in, so if that were source_root itself, "moving" it up to
+        # source_root would mean deleting source_root's own parent-of-itself
+        # out from under the folder we're about to move -- exactly the bug
+        # that produced the WinError 3 / "path not found" failure here.
+        extract_tmp = local_dir / "_extract_tmp"
         extracted_root = await github_service.download_and_extract(
-            record.owner, record.name, record.ref, source_root
+            record.owner, record.name, record.ref, extract_tmp
         )
 
         files = chunker.walk_repo(
@@ -70,10 +77,10 @@ async def run_indexing(repo_id: str) -> None:
 
         # Move the extracted tree so file paths served to the frontend are
         # stable regardless of the tarball's top-level "<repo>-<sha>" folder name.
-        if extracted_root != source_root:
-            if source_root.exists():
-                shutil.rmtree(source_root)
-            extracted_root.rename(source_root)
+        if source_root.exists():
+            shutil.rmtree(source_root)
+        extracted_root.rename(source_root)
+        shutil.rmtree(extract_tmp, ignore_errors=True)
 
         all_chunks = []
         indexed_files: list[IndexedFile] = []
