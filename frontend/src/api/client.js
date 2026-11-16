@@ -105,7 +105,9 @@ export function streamChat(repoId, messages, { model, topK = 8, onEvent, onError
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-        buffer += decoder.decode(value, { stream: true });
+        // sse-starlette terminates lines with "\r\n"; normalize so the
+        // blank-line event separator below matches.
+        buffer = (buffer + decoder.decode(value, { stream: true })).replace(/\r\n/g, "\n");
 
         const chunks = buffer.split("\n\n");
         buffer = chunks.pop() ?? "";
